@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from config import app,db
-from models import Ci,User
+from models import Ci,User,Finished,IsCreating
+import configparser
+import datetime
 
 @app.route('/')
 def hello():
@@ -115,20 +117,98 @@ def poetry_find_by_rhythmic(keyword):
         results_json = results_json + "]," + "\"num\":" + str(i) + "}"
     return results_json
 
+# 根据用户名，词牌名，词的内容，进行储存(有字数限制 512个字，包含标点），赋予“我的创作”编号
+#  Done
+@app.route('/user/<user_id>/user_name/<name>/poetry/<words>/rhythmic/<rhythmic>')
+def save_poetry(user_id,name,words,rhythmic):
+    config=configparser.ConfigParser()
+    config.read('config.ini')
+    sn = int(config['info']['finished_sn'])
+    config.set('info','finished_sn',str(sn+1))
+    config.write(open('config.ini',"w"))
+    nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    db.session.add(Finished(sn=sn,user_id=user_id,user_name=name,rhythmic=rhythmic,paragraphs=words,time=nowTime,comment=''))
+    db.session.commit()
+    the_user = User.query.filter_by(user_id=user_id).first()
+    the_user_finished = the_user.finished
+    if the_user_finished != None:
+        the_user_finished = the_user.finished + str(sn) + ','
+        User.query.filter_by(user_id=user_id).update({'finished': the_user_finished})
+    else:
+        the_user_finished = the_user.finished + str(sn) + ','
+        User.query.filter_by(user_id=user_id).update({'finished': the_user_finished})
+    db.session.commit()
+    return "{\"ok\":1}"
+
 # 储存评论，需要发表人的id以及被评论的id
-@app.route('/user/<user_id>/poetry/<id>/comment/<comment>')
-def save_comments(user_id,id):
-    return id
+#  Done
+@app.route('/user_name/<name>/finished/<sn>/comment/<comment>')
+def save_comments(name,sn,comment):
+    finished = Finished.query.filter_by(sn=sn).first()
+    nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    if finished.comment == None:
+        comment_json = "{\"user_name\":\"" + name + "\"," + "\"comment\":\"" + comment + "\"," + "\"time\":\"" + nowTime + "\"},"
+    else:
+        comment_json = finished.comment + "{\"user_name\":\"" + name + "\"," + "\"comment\":\"" + comment + "\"," + "\"time\":\"" + nowTime + "\"},"
+    Finished.query.filter_by(sn=sn).update({'comment': comment_json})
+    db.session.commit()
+    return "{\"ok\":1}"
 
-# 根据用户名，词牌名，词的内容，进行储存
-@app.route('/user/<user_id>/poetry/<words>/cipai/<cipai>')
-def save_poetry(user_id,words,cipai):
-    return True
+# 根据用户名，词牌名，词的内容，进行储存(默认会储存新的创作）
+#  Done
+@app.route('/user/<user_id>/user_name/<name>/iscreating/<words>/rhythmic/<rhythmic>')
+def save_iscreating(user_id,name,words,rhythmic):
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    sn = int(config['info']['is_creating_sn'])
+    config.set('info', 'is_creating_sn', str(sn + 1))
+    config.write(open('config.ini', "w"))
+    nowTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    db.session.add(
+        IsCreating(sn=sn, user_id=user_id, user_name=name, rhythmic=rhythmic, paragraphs=words, time=nowTime))
+    db.session.commit()
+    the_user = User.query.filter_by(user_id=user_id).first()
+    the_user_is_creating = the_user.is_creating
+    if the_user_is_creating != None:
+        the_user_is_creating = the_user.is_creating + str(sn) + ','
+    else:
+        the_user_is_creating = the_user.is_creating + str(sn) + ','
+    User.query.filter_by(user_id=user_id).update({'is_creating': the_user_is_creating})
+    db.session.commit()
+    return "{\"ok\":1}"
 
-# 根据用户名，词牌名，词的内容，进行储存
-@app.route('/user/<user_id>/iswriting/<words>/cipai/<cipai>')
-def save_iswriting(user_id,words,cipai):
-    return True
+# 根据完成作品编号返回对应作品
+#  Done
+@app.route('/finished/<sn>')
+def poetry_find_by_finished_sn(sn):
+    result = Finished.query.filter_by(sn=sn).first()
+    results_json = "{\"data\":["
+    results_json += "{\"sn\":" + str(result.sn) + ","
+    results_json += "\"user_id\":" + "\"" + result.user_id + "\","
+    results_json += "\"user_name\":" + "\"" + result.user_name + "\","
+    results_json += "\"rhythmic\":" + "\"" + result.rhythmic + "\","
+    results_json += "\"paragraphs\":" + "\"" + result.paragraphs + "\","
+    results_json += "\"time\":" + "\"" + str(result.time) + "\","
+    if result.comment == '':
+        results_json += "\"comment\":[]"
+    else:
+        results_json += "\"comment\":[" + result.comment[:-1] + "]"
+    results_json = results_json + "}]}"
+    return results_json
+
+# 根据正在创作作品编号返回对应作品
+#  Done
+@app.route('/iscreating/<sn>')
+def poetry_find_by_iscreating(sn):
+    result = IsCreating.query.filter_by(sn=sn).first()
+    results_json = "{\"data\":["
+    results_json += "{\"sn\":" + str(result.sn) + ","
+    results_json += "\"user_id\":" + "\"" + result.user_id + "\","
+    results_json += "\"user_name\":" + "\"" + result.user_name + "\","
+    results_json += "\"rhythmic\":" + "\"" + result.rhythmic + "\","
+    results_json += "\"paragraphs\":" + "\"" + result.paragraphs + "\","
+    results_json += "\"time\":" + "\"" + str(result.time) + "\"}]}"
+    return results_json
 
 # 根据word 返回这个字对应的平仄
 @app.route('/pingze/<word>')
