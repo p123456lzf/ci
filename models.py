@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from config import db
 
-class ci(db.Model):
+class Ci(db.Model):
     sn = db.Column(db.Integer,primary_key=True)
     author = db.Column(db.String(64),unique=True)
     paragraphs = db.Column(db.String(1024),unique=True)
@@ -13,7 +13,7 @@ class ci(db.Model):
         self.paragraphs = paragraphs
         self.rhythmic = rhythmic
 
-class user(db.Model):
+class User(db.Model):
     user_id = db.Column(db.Integer,primary_key=True)
     user_name = db.Column(db.String(64),unique=True)
     looked = db.Column(db.String(1024), unique=True)
