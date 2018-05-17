@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from config import app,db
 from models import Ci,User,Finished,IsCreating
+from get_pinyin import PinYin
 import configparser
 import datetime
 
@@ -211,14 +212,46 @@ def poetry_find_by_iscreating(sn):
     return results_json
 
 # 根据word 返回这个字对应的平仄
-@app.route('/pingze/<word>')
-def get_pingze(word):
-    return word
+@app.route('/pingze/<words>')
+def get_pingze(words):
+    test = PinYin()
+    test.load_word()
+    results = test.hanzi2yindiao(string=words)
+    pz = []
+    for result in results:
+        x1, x2, x3 = 0, 0, 0
+        for i in result:
+            if i == '1' or i == '2':
+                x1 = 1
+                continue
+            if i == '3' or i == '4':
+                x2 = 1
+                continue
+            if i == '5':
+                x1 = 1
+                x2 = 1
+                continue
+            x3 = 1
+        if x1 == 1 and x2 == 1:
+            pz.append('中')
+            continue
+        if x1 == 1 and x2 == 0:
+            pz.append('平')
+            continue
+        if x1 == 0 and x2 == 1:
+            pz.append('仄')
+            continue
+        if x3 == 1:
+            pz.append('空')
+    return str(pz)
 
 # 根据word 返回这个字对应的合适的韵脚
-@app.route('/yunjiao/<word>')
+@app.route('/yunjiao/<words>')
 def get_yunjiao(word):
-    return word
+    test = PinYin()
+    test.load_word()
+    results = test.hanzi2yunjiao(string=words)
+    return str(results)
 
 
 if __name__ == "__main__":
