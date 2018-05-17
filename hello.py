@@ -212,6 +212,7 @@ def poetry_find_by_iscreating(sn):
     return results_json
 
 # 根据word 返回这个字对应的平仄
+#  Done
 @app.route('/pingze/<words>')
 def get_pingze(words):
     test = PinYin()
@@ -245,13 +246,29 @@ def get_pingze(words):
             pz.append('空')
     return str(pz)
 
-# 根据word 返回这个字对应的合适的韵脚
+# 根据words 返回这些字是否韵脚相同 并返回对应的韵脚推荐(返回{"ok":0}表示韵脚不统一，或者多音字不确定韵脚，若统一则返回推荐韵脚）
+#  Done
 @app.route('/yunjiao/<words>')
-def get_yunjiao(word):
+def get_yunjiao(words):
     test = PinYin()
     test.load_word()
     results = test.hanzi2yunjiao(string=words)
-    return str(results)
+    for index, item in enumerate(results):
+        if index == 0:
+            first_yj = item
+        else:
+            ok = 0
+            for i in item:
+                if i in first_yj:
+                    first_yj = [i]
+                    ok = 1
+            if ok == 0:
+                return "{\"ok\":0,\"suggestion\":\"[]\"}"
+    if len(first_yj) == 1:
+        suggestion = test.get_yunjiao(first_yj[0])
+        return "{\"ok\":1,\"suggestion\":\"" + str(suggestion) + "\"}"
+    else:
+        return "{\"ok\":0,\"suggestion\":\"" + str(first_yj) + "\"}"
 
 
 if __name__ == "__main__":

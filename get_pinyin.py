@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 import os.path
-from yunjiao import result1,result2
+from yunjiao import yunmu,yunjiao
 
 class PinYin(object):
     def __init__(self, dict_file='word.data'):
@@ -39,7 +39,7 @@ class PinYin(object):
             key = '%X' % ord(char)
             the_result = []
             for i in self.word_dict.get(key, char).split():
-                the_result.append(i[-1:].lower())
+                the_result.append(yunmu[i[:-1].lower()])
             result.append(the_result)
         return result
 
@@ -54,12 +54,16 @@ class PinYin(object):
             result.append(the_result)
         return result
 
+    def get_yunjiao(selfself, string=""):
+        return yunjiao[string]
+
 if __name__ == "__main__":
     test = PinYin()
     test.load_word()
-    string = "大江东去，浪淘尽的"
+    string = "啊"
     print("in: %s" % string)
     print("out: %s" % str(test.hanzi2pinyin(string=string)))
     print("out: %s" % str(test.hanzi2yindiao(string=string)))
     print("out: %s" % str(test.hanzi2yunjiao(string=string)))
+    print(str(test.get_yunjiao('a')))
     #print("out: %s" % test.hanzi2pinyin_split(string=string, split="-"))
