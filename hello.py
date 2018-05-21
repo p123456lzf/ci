@@ -2,6 +2,7 @@
 from config import app,db
 from models import Ci,User,Finished,IsCreating
 from get_pinyin import PinYin
+from pingze import pingzes
 import configparser
 import datetime
 
@@ -269,6 +270,16 @@ def get_yunjiao(words):
         return "{\"ok\":1,\"suggestion\":\"" + str(suggestion) + "\"}"
     else:
         return "{\"ok\":0,\"suggestion\":\"" + str(first_yj) + "\"}"
+
+# 根据词牌名返回词牌对应格式
+#  Done
+@app.route('/rhythmic_rule/<keyword>')
+def get_rhythmic_rule(keyword):
+    try:
+        result_json = "{\"ok\":1,\"rule\":\"" + pingzes[keyword] + "\"}"
+    except:
+        result_json = "{\"ok\":0,\"rule\":\"\"}"
+    return result_json
 
 
 if __name__ == "__main__":
