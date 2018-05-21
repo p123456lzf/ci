@@ -275,10 +275,17 @@ def get_yunjiao(words):
 #  Done
 @app.route('/rhythmic_rule/<keyword>')
 def get_rhythmic_rule(keyword):
-    try:
-        result_json = "{\"ok\":1,\"rule\":\"" + pingzes[keyword] + "\"}"
-    except:
-        result_json = "{\"ok\":0,\"rule\":\"\"}"
+    keys = [x for x in pingzes.items() if keyword in x[0]]
+    num = 0
+    result_json = "{\"ok\":1,\"data\":["
+    for key in keys:
+        print(key[0])
+        print(key[1])
+        num += 1
+        result_json += "{\"rhythmic\":\"" + key[0] + "\",\"rule\":\"" + key[1] + "\"},"
+    result_json =result_json[:-1] + "],\"num\":" + str(num) + "}"
+    if num == 0:
+        result_json = "{\"ok\":0,\"num\":0}"
     return result_json
 
 
