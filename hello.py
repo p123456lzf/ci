@@ -297,6 +297,4 @@ def get_rhythmic_rule(keyword):
 
 
 if __name__ == "__main__":
-    #print(into_flash_str(4201587825642984))
     app.run()
-    #, ssl_context=("ssl.crt","ssl.key")
