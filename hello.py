@@ -5,6 +5,7 @@ from get_pinyin import PinYin
 from pingze import pingzes
 import configparser
 import datetime
+from gevent.wsgi import WSGIServer
 
 @app.route('/')
 def hello():
@@ -286,8 +287,6 @@ def get_rhythmic_rule(keyword):
     num = 0
     result_json = "{\"ok\":1,\"data\":["
     for key in keys:
-        print(key[0])
-        print(key[1])
         num += 1
         result_json += "{\"rhythmic\":\"" + key[0] + "\",\"rule\":\"" + key[1] + "\"},"
     result_json =result_json[:-1] + "],\"num\":" + str(num) + "}"
@@ -297,4 +296,4 @@ def get_rhythmic_rule(keyword):
 
 
 if __name__ == "__main__":
-    app.run()
+    WSGIServer(('127.0.0.1', 5000), app).serve_forever()
