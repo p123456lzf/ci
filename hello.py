@@ -295,5 +295,6 @@ def get_rhythmic_rule(keyword):
     return result_json
 
 
+
 if __name__ == "__main__":
     WSGIServer(('127.0.0.1', 5000), app).serve_forever()
