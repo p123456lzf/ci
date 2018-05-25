@@ -294,6 +294,9 @@ def get_rhythmic_rule(keyword):
         result_json = "{\"ok\":0,\"num\":0}"
     return result_json
 
+@app.route('.well-known/pki-validation/fileauth.txt')
+def a():
+    return "201805251248352o1epww13e43x6rfnbdoqh1dku5r9p4bfjipiyb389y7ba6bid"
 
 
 if __name__ == "__main__":
