@@ -62,3 +62,6 @@ class IsCreating(db.Model):
         self.paragraphs = paragraphs
         self.time = time
 #        self.comment = comment
+
+if __name__ == "__main__":
+    db.create_all()
