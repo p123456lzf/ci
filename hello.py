@@ -63,6 +63,18 @@ def get_poetry(user_id,id):
     db.session.commit()
     return results_json
 
+# 用于返回具体某个词
+#  Done（无需异常处理）
+@app.route('/poetry/<id>')
+def poetry(id):
+    results = Ci.query.filter_by(sn=id).first()
+    results_json = "{\"data\":[{"
+    results_json += "\"sn\":" + str(results.sn) + ","
+    results_json += "\"author\":" + "\"" + results.author + "\","
+    results_json += "\"paragraphs\":" + "\"" + results.paragraphs.replace("\"","'") + "\","
+    results_json += "\"rhythmic\":" + "\"" + results.rhythmic + "\"}]}"
+    return results_json
+
 # 根据诗人返回符合的词
 #  Done（已异常处理）
 @app.route('/author/<keyword>')
@@ -293,10 +305,6 @@ def get_rhythmic_rule(keyword):
     if num == 0:
         result_json = "{\"ok\":0,\"num\":0}"
     return result_json
-
-@app.route('/.well-known/pki-validation/fileauth.txt')
-def a():
-    return "201805251248352o1epww13e43x6rfnbdoqh1dku5r9p4bfjipiyb389y7ba6bid"
 
 
 if __name__ == "__main__":
