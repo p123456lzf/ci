@@ -5,11 +5,22 @@ from get_pinyin import PinYin
 from pingze import pingzes
 import configparser
 import datetime
+import requests
 #from gevent.wsgi import WSGIServer
 
 @app.route('/')
 def hello():
     return 'hello'
+
+# 用于获取openId
+#  Done（无需异常处理）
+@app.route('/code/<code>')
+def get_openid(code):
+    appid = 'wxd0b140e0c4bca15c'
+    secret = '5eb8dedf56d6dcae52cc3bd6595065ac'
+    url = 'https://api.weixin.qq.com/sns/jscode2session?appid=' + appid + '&secret=' + secret + '&grant_type=authorization_code&js_code=' + code
+    result = requests.get(url,headers={'content-type': 'application/json'})
+    return result.text
 
 # 用于第一次登陆，如果此人是第一次登陆，则建库储存个人基本信息(ok为0表示此用户第一次登陆，为1表示老用户）
 #  Done（无需异常处理）
@@ -308,5 +319,6 @@ def get_rhythmic_rule(keyword):
 
 
 if __name__ == "__main__":
+    print(get_openid("0334rMMm0mBAPr1c4vQm0D1tMm04rMMm"))
     app.run(host='0.0.0.0',port=80,ssl_context=('www.ikjmls.cn.crt', 'www.ikjmls.cn.key'))
     #WSGIServer(('0.0.0.0', 80), app).serve_forever()
